@@ -1,10 +1,12 @@
-pipeline 
+pipeline {
     agent any
 
     environment {
-        // Gmail credentials stored in Jenkins Credentials (Username with Password)
+        // Jenkins credentials ID for Gmail (Username with App Password)
         EMAIL_CREDENTIALS = '7df8a63a-e7bb-40d7-bb0e-0ed05e4766a4'
         RECIPIENT = 'deeps19nija@gmail.com'
+        VENV_DIR = 'venv'
+        FLASK_LOG = 'nohup.out'
     }
 
     stages {
@@ -13,14 +15,14 @@ pipeline
                 echo 'Setting up virtual environment and installing dependencies...'
                 sh '''
                 # Remove old virtual environment if exists
-                rm -rf venv
+                rm -rf ${VENV_DIR}
                 # Create virtual environment
-                python3 -m venv venv
+                python3 -m venv ${VENV_DIR}
                 # Activate venv
-                . venv/bin/activate
+                . ${VENV_DIR}/bin/activate
                 # Upgrade pip
                 pip install --upgrade pip
-                # Install dependencies from requirements.txt
+                # Install dependencies
                 pip install -r requirements.txt
                 '''
             }
@@ -30,7 +32,7 @@ pipeline
             steps {
                 echo 'Running unit tests with pytest...'
                 sh '''
-                . venv/bin/activate
+                . ${VENV_DIR}/bin/activate
                 # Install pytest if not already installed
                 pip install pytest
                 # Run tests
@@ -43,9 +45,10 @@ pipeline
             steps {
                 echo 'Deploying Flask app to staging...'
                 sh '''
-                . venv/bin/activate
+                . ${VENV_DIR}/bin/activate
                 # Run Flask app in background using nohup
-                nohup python3 app.py > flask.log 2>&1 &
+                nohup python3 app.py > ${FLASK_LOG} 2>&1 &
+                echo "Flask app deployed and running in background. Logs: ${FLASK_LOG}"
                 '''
             }
         }
@@ -57,7 +60,10 @@ pipeline
             emailext (
                 to: "${RECIPIENT}",
                 subject: "Jenkins Build Success: ${JOB_NAME} #${BUILD_NUMBER}",
-                body: "The Jenkins pipeline completed successfully.\n\nCheck logs at ${BUILD_URL}"
+                body: "The Jenkins pipeline completed successfully.\n\nCheck logs at ${BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                from: "${RECIPIENT}",
+                replyTo: "${RECIPIENT}"
             )
         }
 
@@ -66,9 +72,11 @@ pipeline
             emailext (
                 to: "${RECIPIENT}",
                 subject: "Jenkins Build Failed: ${JOB_NAME} #${BUILD_NUMBER}",
-                body: "The Jenkins pipeline failed. Check the console output:\n${BUILD_URL}"
+                body: "The Jenkins pipeline failed. Check the console output:\n${BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                from: "${RECIPIENT}",
+                replyTo: "${RECIPIENT}"
             )
         }
     }
 }
-
