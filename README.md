@@ -130,4 +130,119 @@ MIT License
 ---
 
 
+------------------------------------------------------------------------------------------------
+1. Jenkins CI CD pipeline for flask application
+
+. AWS EC2 SETUP
+1.1 Launch EC2 Instance
+•	OS: Ubuntu 22.04
+•	Instance type: t2.micro
+•	Open the following ports in the security group:
+o	22 (SSH)
+o	8080 (Jenkins)
+o	5000 (Flask app staging environment)
+
+<img width="940" height="408" alt="image" src="https://github.com/user-attachments/assets/f198bc3a-dd8e-403c-915e-b6fa71a10953" />
+
+ 
+
+2.1 Install Java (required for Jenkins)
+sudo apt update
+sudo apt install openjdk-17-jdk -y
+
+<img width="940" height="475" alt="image" src="https://github.com/user-attachments/assets/78b1dc89-de32-4c3e-89c1-3e7a0a896991" />
+
+ 
+Login to Jenkins by getting the password 
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+ <img width="940" height="486" alt="image" src="https://github.com/user-attachments/assets/26ca922a-5a0a-49b7-a2dc-cf1a31d00f83" />
+
+
+Install Suggested plugins
+
+You will be promted to a form to update username password 
+
+http://35.179.183.102:8080/
+<img width="940" height="452" alt="image" src="https://github.com/user-attachments/assets/a2ccbb48-3fdc-4922-8a3c-71a13484fcc8" />
+
+ 
+
+3. CONFIGURE JENKINS WITH PYTHON
+
+Install Python + pip:
+
+sudo apt install python3 python3-pip -y
+
+Install necessary plugins in Jenkins:
+•	Git plugin
+•	Pipeline plugin
+•	Email Extension plugin
+Create a Python virtual environment (optional but recommended):
+sudo pip3 install virtualenv
+Check for necessary plugins in jenkins
+•  Git plugin
+•  Pipeline plugin
+•  Email Extension plugin
+
+4. FORK SAMPLE FLASK APPLICATION and after forking clone it as below: 
+ <img width="940" height="284" alt="image" src="https://github.com/user-attachments/assets/70ce700c-3e76-49a2-9513-7f81dd00b6b4" />
+
+
+CREATE THE JENKINSFILE at root of your repo project and push it to your githhub repo.
+
+6. CONFIGURE GITHUB WEBHOOK TRIGGERS
+1.	In Jenkins → Job → Configure:
+o	Check GitHub hook trigger for GITScm polling
+2.	Pipeline Section
+Select:
+Definition: Pipeline script from SCM
+SCM: Git
+Branch: main
+Script Path: Jenkinsfile
+o	
+3.	In your GitHub repo:
+Settings → Webhooks → Add webhook
+Payload URL: http://EC2-PUBLIC-IP:8080/github-webhook/
+Content type: application/json
+Trigger: Just the push event
+This ensures every push to main branch triggers the pipeline.
+
+
+ <img width="940" height="313" alt="image" src="https://github.com/user-attachments/assets/0927dab0-128c-4a3b-8467-77ff2951b207" />
+
+7. SETUP EMAIL NOTIFICATIONS
+In Jenkins:
+Manage Jenkins → Configure System → Email Notification
+SMTP example for Gmail:
+SMTP server: smtp.gmail.com
+Port: 587
+Use SSL: Yes
+Username: your-email@gmail.com
+App Password: xxxxxxxx (from Google App Passwords)
+
+
+ <img width="940" height="509" alt="image" src="https://github.com/user-attachments/assets/27f3159f-5dd7-4e6b-8edb-dad739c9df78" />
+
+________________________________________
+8. DEPLOYMENT ON EC2 (STAGING ENVIRONMENT)
+Flask app runs automatically from Jenkins:
+nohup python app.py &
+Access the Flask app via:
+http://EC2-PUBLIC-IP:5000
+
+ 
+
+
+ <img width="940" height="673" alt="image" src="https://github.com/user-attachments/assets/2b15707a-e17b-4cf1-b171-a15f926d1bdf" />
+
+
+<img width="940" height="640" alt="image" src="https://github.com/user-attachments/assets/d77a8577-f603-4ee2-bd0c-9937b3bd4417" />
+
+
+ 
+
+
+
+
 
