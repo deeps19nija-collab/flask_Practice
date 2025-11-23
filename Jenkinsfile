@@ -1,10 +1,10 @@
-pipeline {
+pipeline 
     agent any
 
     environment {
         // Gmail credentials stored in Jenkins Credentials (Username with Password)
-        EMAIL_CREDENTIALS = 'gmail-credentials-id'
-        RECIPIENT = 'your-email@gmail.com'
+        EMAIL_CREDENTIALS = '7df8a63a-e7bb-40d7-bb0e-0ed05e4766a4'
+        RECIPIENT = 'deeps19nija@gmail.com'
     }
 
     stages {
